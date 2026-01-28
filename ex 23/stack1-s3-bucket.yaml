@@ -1,0 +1,11 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create an S3 bucket to store website content (index.html)
+
+Resources:
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+
+Outputs:
+  BucketName:
+    Description: S3 Bucket Name (use this to upload index.html)
+    Value: !Ref WebsiteBucket
