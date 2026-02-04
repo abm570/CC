@@ -2,6 +2,7 @@ icacls <key_name.pem/ppk> /inheritance:r
 
 icacls <key_name.pem/ppk> /grant:r <username>:R
 
+(Optional)
 icacls <key_name.pem/ppk> /remove "Users" "Authenticated Users" "Everyone"
 
 Verify:-
