@@ -6,4 +6,4 @@ icacls <key_name.pem/ppk> /grant:r <username>:R
 icacls <key_name.pem/ppk> /remove "Users" "Authenticated Users" "Everyone"
 
 Verify:-
-icacls key-putty.pem
+icacls <key_name.pem/ppk>
