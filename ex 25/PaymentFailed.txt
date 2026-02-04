@@ -1,4 +1,0 @@
-{
-  "eventType": "PAYMENT_FAILED",
-  "user": "Anita"
-}
