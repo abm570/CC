@@ -1,0 +1,1 @@
+If the PuTTY doesn't work using public dns and public ip while logging in then use only username i.e., 'ec2-user'
