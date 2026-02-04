@@ -1,0 +1,23 @@
+valkey-cli -h <PRIMARY_ENDPOINT> -p 6379
+
+PING
+
+SET course "Cloud Computing"
+
+GET course
+
+INCR visits
+
+INCR visits
+
+GET visits
+
+SET notice "Results Published" EX 60
+
+TTL notice
+
+GET notice
+
+DEL course
+
+GET course
