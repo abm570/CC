@@ -1,0 +1,35 @@
+Step 4 — connect to private windows instance
+We cannot connect directly from your laptop → No Public IP.
+We must connect from within WebInstance (jump server / bastion host).
+Remote Login from WebInstance → DBInstance
+●	While logged into WebInstance, open Remote Desktop Connection. [mstsc]
+●	Enter:
+o	Computer → Private IP of DBInstance
+●	Click Connect.
+●	Credentials:
+o	Username → Administrator
+o	Password → Paste the decrypted password (same key pair)
+●	Click OK.
+You are now inside the private Windows instance.
+
+Step 5 — testing NAT gateway connectivity (Verify Internet Access)
+From WebInstance (Public Subnet)
+●	Open a browser → Internet should work (through IGW).
+From DBInstance (Private Subnet)
+●	Open browser → Internet should also work (through NAT Gateway).
+●	Internet icon will show "Internet Access".
+Security Check
+●	DBInstance cannot receive inbound traffic from internet.
+●	Only outbound is allowed via NAT (safe for DB servers).
+
+
+Test: From DBInstance (Private Subnet) → ping Google (Outbound Allowed)
+
+Steps
+Connect to DBInstance (using RDP from WebInstance).
+Open Command Prompt inside DBInstance.
+Type: ping google.com
+Expected Result
+●	It will successfully ping google.com
+●	You will see replies like: 
+Reply from 142.250.xxx.xxx: bytes=32 time=20ms TTL=115

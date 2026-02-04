@@ -1,0 +1,41 @@
+CREATE EXTERNAL TABLE IF NOT EXISTS students (
+  StudentID int,
+  Name string,
+  Dept string,
+  Marks int,
+  Result string
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+  'separatorChar' = ',',
+  'quoteChar'     = '"',
+  'escapeChar'    = '\\'
+)
+STORED AS TEXTFILE
+LOCATION 's3://YOUR_BUCKET_NAME/'
+TBLPROPERTIES ('skip.header.line.count'='1');
+
+
+SELECT * FROM students;
+
+SELECT COUNT(*) AS total_students FROM students;
+
+SELECT Result, COUNT(*) AS cnt
+FROM students
+GROUP BY Result;
+
+SELECT AVG(Marks) AS avg_marks
+FROM students;
+
+SELECT Dept, AVG(Marks) AS avg_marks
+FROM students
+GROUP BY Dept;
+
+SELECT Name, Dept, Marks
+FROM students
+ORDER BY Marks DESC
+LIMIT 1;
+
+SELECT StudentID, Name, Dept, Marks
+FROM students
+WHERE Result = 'Fail';

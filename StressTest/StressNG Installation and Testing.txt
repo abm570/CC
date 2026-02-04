@@ -1,0 +1,90 @@
+Create a test web page:
+echo "<h1>EC2 Stress Test Demo — $(hostname)</h1>" | sudo tee /var/www/html/index.html
+
+STEP 4 — Install and Run the Stress Testing Tool (stress-ng)
+(For Amazon Linux 2023 EC2 Instances)
+Move to the ec2-user home directory
+(It is recommended to run stress-ng from the home folder)
+cd ~
+Install stress-ng
+Amazon Linux 2023 includes stress-ng directly through dnf, so install it using:
+sudo dnf install stress-ng -y
+Run a CPU Stress Test
+Generate high CPU load using 4 CPU workers for 2 minutes:
+stress-ng --cpu 4 --timeout 120
+Expected Result
+●	Terminal becomes busy during the 120-second load test
+●	After completion, you will see:
+successful run completed in 120.02s
+●	CPU usage will spike to 90–100% (you can check using top)
+
+Step 5 — Run Stress Test (CPU Load Generation)
+Move to home directory to avoid permission issues:
+cd  ~
+Run CPU stress for 2 minutes using 4 CPU workers:
+stress-ng --cpu 4 --timeout 120
+You should see messages like:
+stress-ng: info: dispatching hogs: 4 cpu
+stress-ng: info: successful run completed in 120.02s
+This will increase CPU usage to ~100% for the duration.
+
+6A. Create Launch Template
+●	EC2 → Launch Templates → Create
+●	Name: WebServer-LT
+●	AMI: WebServer-AMI
+●	Instance type: t3.micro
+●	Security Group: allow HTTP + SSH
+●	Create
+
+
+
+
+6B. Create Auto Scaling Group
+●	Go to Auto Scaling → Create Auto Scaling Group
+●	Name: WebApp-ASG
+●	Select Launch Template: WebServer-LT
+●	Choose VPC + two public subnets
+●	Load Balancing:
+o	Attach to existing ALB
+o	Choose WebApp-TG
+●	Group size:
+o	Desired: 1
+o	Min: 1
+o	Max: 3
+●	Create
+
+
+
+
+
+
+
+STEP 7 — Configure Auto Scaling Policies
+Go to ASG → Automatic Scaling → Add Policy
+Scale-Out Policy
+●	Metric: CPU Utilization
+●	Rule: > 60% for 2 minutes
+●	Action: Add +1 instance
+Scale-In Policy
+●	Rule: < 20% for 5 minutes
+●	Action: Remove 1 instance
+
+STEP 8 — Stress Test to Trigger Scaling
+SSH into your running instance:
+Install stress:
+sudo amazon-linux-extras install epel -y
+sudo yum install stress -y
+Run CPU load:
+stress --cpu 90 --timeout 300
+Within 2–3 minutes:
+●	CPU becomes high
+●	ASG launches second instance
+●	Target Group shows both instances as healthy
+
+STEP 9 — Test Load Balancing
+Open ALB DNS Name in browser: http://<alb-dns-name>
+Refresh many times — you will see:
+Hello from Instance 1 — ip-XX-XX…
+Hello from Instance 2 — ip-YY-YY…
+●	Confirms ALB working
+●	Confirms auto scaling working

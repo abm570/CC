@@ -1,0 +1,20 @@
+#!/bin/bash
+# Update packages
+yum update -y
+
+# Install Apache Web Server
+yum install -y httpd
+
+# Start Apache
+systemctl start httpd
+systemctl enable httpd
+
+# Create website content
+echo "<html>
+<head><title>Welcome to My Auto Web Server</title></head>
+<body style='text-align:center; background-color:#e9f5ff;'>
+<h1>Welcome to EC2 Instance</h1>
+<h2>Apache Installed Automatically via User Data Script</h2>
+<p>This is a static website hosted on EC2 using User Data automation.</p>
+</body>
+</html>" > /var/www/html/index.html

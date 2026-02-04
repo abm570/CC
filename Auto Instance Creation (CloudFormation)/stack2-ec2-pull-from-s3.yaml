@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Launch EC2 (Amazon Linux 2023), install Apache, and pull index.html from S3
+
+Parameters:
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Select an existing EC2 Key Pair to enable SSH access
+
+  BucketName:
+    Type: String
+    Description: Enter the S3 bucket name created in Stack-1 (Output)
+
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Select a PUBLIC subnet (default VPC public subnet recommended)
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Select the VPC (default VPC recommended)
+
+Resources:
+  WebServerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3ReadOnlyForWebsiteBucket
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${BucketName}"
+                  - !Sub "arn:aws:s3:::${BucketName}/*"
+
+  WebServerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref WebServerRole
+
+  WebServerSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH (22) and HTTP (80)
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  WebServerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      KeyName: !Ref KeyName
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref WebServerSG
+      IamInstanceProfile: !Ref WebServerInstanceProfile
+
+      # Amazon Linux 2023 AMI for Mumbai (ap-south-1)
+      ImageId: ami-02b49a24cfb95941c
+
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          dnf update -y
+          dnf install -y httpd
+          systemctl enable httpd
+          systemctl start httpd
+
+          # pull index.html from S3 to Apache web root
+          aws s3 cp s3://${BucketName}/index.html /var/www/html/index.html
+
+          systemctl restart httpd
+
+Outputs:
+  WebsiteURL:
+    Description: Open this URL in browser
+    Value: !Sub "http://${WebServerInstance.PublicDnsName}"

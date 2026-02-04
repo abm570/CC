@@ -1,0 +1,16 @@
+Valid Input:
+{
+  "StudentName": "Anita",
+  "Marks": 86
+}
+
+Missing Marks:
+{
+  "StudentName": "Rahul"
+}
+
+Invalid Marks:
+{
+  "StudentName": "Priya",
+  "Marks": 150
+}
